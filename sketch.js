@@ -4,8 +4,11 @@ let controlRods = [false, false, false, false];
 let reactorRunning = false;
 let neutronCount = 0;
 let powerOutput = 0;
+let injectorFailed = false;
 const coreRadius = 150;
 const numRods = 12;
+const baseNeutronRate = 1000; // ms per neutron spawn
+let neutronInterval;
 
 function setup() {
   createCanvas(400, 500);
@@ -71,10 +74,14 @@ function draw() {
   let insertedRods = controlRods.filter(rod => rod).length;
   powerOutput = max(0, neutronCount * 0.5 - insertedRods * 5);
   powerOutput = min(powerOutput, 100);
+  // Update injector status display
+  document.getElementById('status').innerText = `Injector Status: ${injectorFailed ? 'Failed' : 'Normal'}`;
 }
 
 function spawnNeutron() {
   if (!reactorRunning) return;
+  // Adjust spawn rate based on injector status
+  if (injectorFailed && random() > 0.1) return; // 10% chance to spawn if failed
   let rod = fuelRods[floor(random(fuelRods.length))];
   let angle = random(TWO_PI);
   neutrons.push({
@@ -87,10 +94,11 @@ function spawnNeutron() {
   setTimeout(() => {
     rod.active = true;
     setTimeout(() => { rod.active = false; }, 200);
-    neutrons.splice(neutrons.indexOf(neutrons.find(n => n.x === rod.x && n.y === rod.y)), 1);
+    let neutronIndex = neutrons.findIndex(n => n.x === rod.x && n.y === rod.y);
+    if (neutronIndex !== -1) neutrons.splice(neutronIndex, 1);
     neutronCount--;
     let insertedRods = controlRods.filter(rod => rod).length;
-    let kEffective = 1.2 - (insertedRods * 0.3);
+    let kEffective = (injectorFailed ? 0.8 : 1.2) - (insertedRods * 0.3);
     if (random() < kEffective - 1) {
       spawnNeutron();
     }
@@ -101,16 +109,21 @@ function spawnNeutron() {
 function startReactor() {
   if (!reactorRunning) {
     reactorRunning = true;
-    setInterval(spawnNeutron, 1000);
+    neutronInterval = setInterval(spawnNeutron, baseNeutronRate);
   }
 }
 
 function stopReactor() {
   reactorRunning = false;
+  clearInterval(neutronInterval);
   neutrons = [];
   neutronCount = 0;
 }
 
 function toggleControlRod(index) {
   controlRods[index] = !controlRods[index];
+}
+
+function toggleInjectorFailure() {
+  injectorFailed = !injectorFailed;
 }
