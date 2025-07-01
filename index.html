@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cylindrical Nuclear Reactor Core Simulation (p5.js)</title>
+  <title>Cylindrical Nuclear Reactor Simulation with Injector Failure (p5.js)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
   <style>
     body {
@@ -27,6 +27,10 @@
       margin: 5px;
       cursor: pointer;
     }
+    #status {
+      margin-top: 10px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -38,7 +42,9 @@
     <button onclick="toggleControlRod(1)">Toggle Control Rod 2</button>
     <button onclick="toggleControlRod(2)">Toggle Control Rod 3</button>
     <button onclick="toggleControlRod(3)">Toggle Control Rod 4</button>
+    <button onclick="toggleInjectorFailure()">Toggle Injector Failure</button>
   </div>
+  <div id="status">Injector Status: Normal</div>
   <script src="sketch.js"></script>
 </body>
 </html>
